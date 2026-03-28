@@ -113,6 +113,10 @@
   .gauge-fill { height: 100%; border-radius: 3px; transition: width .7s cubic-bezier(.16,1,.3,1); }
   .gauge-pct { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 12px; font-weight: 700; width: 72px; text-align: right; flex-shrink: 0; }
 
+  /* RESULT C */
+  .time-result-section { max-width: 900px; margin: 32px auto 0; padding: 0 28px; display: none; }
+  .time-result-section.show { display: block; }
+
   /* HISTORY */
   .history-section { max-width: 900px; margin: 0 auto; padding: 32px 28px 72px; display: none; }
   .history-section.show { display: block; }
@@ -135,8 +139,9 @@
     .result-meta { text-align: left; }
     .result-top,.result-visual,.result-context,.pct-top,.pct-visual,.pct-context { padding-left: 18px; padding-right: 18px; }
     .gauge-name { width: 120px; font-size: 11px; }
-    .tabs { width: 100%; }
-    .tab-btn { flex: 1; font-size: 10px; padding: 10px 10px; }
+    .tabs { flex-direction: column; width: 100%; }
+    .tab-btn { border-bottom: 1px solid var(--border); padding: 12px 10px; font-size: 11px; }
+    .tab-btn:last-child { border-bottom: none; }
   }
   @keyframes shake { 0%,100%{transform:translateX(0)} 20%{transform:translateX(-5px)} 40%{transform:translateX(5px)} 60%{transform:translateX(-3px)} 80%{transform:translateX(3px)} }
 </style>
@@ -161,6 +166,7 @@
   <div class="tabs">
     <button class="tab-btn active" onclick="switchTab('a')">🛒 Bisa beli berapa?</button>
     <button class="tab-btn" onclick="switchTab('b')">📊 Berapa % dari MBG?</button>
+    <button class="tab-btn" onclick="switchTab('c')">⏳ Setara Waktu?</button>
   </div>
 
   <!-- TAB A -->
@@ -211,6 +217,27 @@
       <button class="preset-btn" onclick="presetPct('Nasi Padang', 10000000, 20000)">🍚 10 Juta Nasi Padang</button>
       <button class="preset-btn" onclick="presetPct('Puskesmas', 100, 5000000000)">🏥 100 Puskesmas @5M</button>
       <button class="preset-btn" onclick="presetPct('iPhone 16 Pro', 10000, 21000000)">📱 10rb iPhone @21jt</button>
+    </div>
+  </div>
+
+  <!-- TAB C -->
+  <div class="tab-panel" id="tab-c">
+    <p class="sec-label">— Masukkan nominal untuk melihat waktu habisnya</p>
+    <div class="calc-form">
+      <div class="field"><label>Deskripsi (Opsional)</label><input type="text" id="time-desc" placeholder="cth: Gaji Setahun..." /></div>
+      <div class="field"><label>Nominal (Rp)</label><input type="text" id="time-nominal" placeholder="cth: 10.000.000" inputmode="numeric" /></div>
+      <div class="btn-group">
+        <button class="clear-btn" onclick="clearC()" title="Reset">✕</button>
+        <button class="calc-btn" onclick="hitungWaktu()">Hitung ↗</button>
+      </div>
+    </div>
+    <div class="presets">
+      <span>Coba:</span>
+      <button class="preset-btn" onclick="presetWaktu('Gaji UMR Jakarta', 5067381)">💼 Gaji UMR JKT</button>
+      <button class="preset-btn" onclick="presetWaktu('Harga Rumah', 500000000)">🏠 Rumah 500Jt</button>
+      <button class="preset-btn" onclick="presetWaktu('1 Miliar', 1000000000)">💰 1 Miliar</button>
+      <button class="preset-btn" onclick="presetWaktu('1 Triliun', 1000000000000)">🏦 1 Triliun</button>
+      <button class="preset-btn" onclick="presetWaktu('Proyek IKN (Tahap 1)', 71800000000000)">🏗️ IKN Tahap 1 (71,8T)</button>
     </div>
   </div>
 </div>
@@ -280,6 +307,28 @@
   </div>
 </section>
 
+<!-- RESULT C -->
+<section class="time-result-section" id="timeResultSection">
+  <div class="result-card">
+    <div class="result-top">
+      <div>
+        <p class="result-label">Nominal tersebut setara dengan pengeluaran MBG selama</p>
+        <div class="result-number" id="timeResultNumber" style="font-size: clamp(32px, 6vw, 64px);">0 detik</div>
+        <p class="result-exact" id="timeResultExact"></p>
+        <p class="result-product" id="timeResultDesc">—</p>
+      </div>
+      <div class="result-meta">
+        <div class="meta-row"><span class="meta-label">Nominal</span><span class="meta-value" id="metaTimeNominal">—</span></div>
+        <div class="meta-row"><span class="meta-label">Kecepatan Habis</span><span class="meta-value">Rp 13,89 Jt / dtk</span></div>
+      </div>
+    </div>
+    <div class="result-context">
+      <p class="context-title">— Detail Waktu</p>
+      <div class="context-grid" id="timeContextGrid"></div>
+    </div>
+  </div>
+</section>
+
 <!-- HISTORY -->
 <section class="history-section" id="historySection">
   <div class="history-title">Riwayat Pencarian <button onclick="clearHistory()">Hapus Semua</button></div>
@@ -327,13 +376,22 @@
     document.getElementById('pct-produk').focus();
   }
 
+  function clearC() {
+    document.getElementById('time-desc').value = '';
+    document.getElementById('time-nominal').value = '';
+    document.getElementById('timeResultSection').className = 'time-result-section';
+    document.getElementById('time-desc').focus();
+  }
+
   /* TABS */
   function switchTab(t) {
-    document.querySelectorAll('.tab-btn').forEach((b,i) => b.classList.toggle('active', i===(t==='a'?0:1)));
+    document.querySelectorAll('.tab-btn').forEach((b,i) => b.classList.toggle('active', i===(t==='a'?0:t==='b'?1:2)));
     document.getElementById('tab-a').classList.toggle('active', t==='a');
     document.getElementById('tab-b').classList.toggle('active', t==='b');
+    document.getElementById('tab-c').classList.toggle('active', t==='c');
     document.getElementById('resultSection').className = 'result-section';
     document.getElementById('pctResultSection').className = 'pct-result-section';
+    document.getElementById('timeResultSection').className = 'time-result-section';
   }
 
   /* ── MODE A ── */
@@ -464,6 +522,68 @@
     saveHist({type:'b', p:produk, jml:jumlah, h:harga, pct});
   }
 
+  /* ── MODE C ── */
+  function presetWaktu(desc, nominal) {
+    switchTab('c');
+    document.getElementById('time-desc').value = desc;
+    document.getElementById('time-nominal').value = nominal.toLocaleString('id-ID');
+    hitungWaktu();
+  }
+
+  function hitungWaktu() {
+    const desc = document.getElementById('time-desc').value.trim() || 'Nominal tersebut';
+    const nominal = parseN(document.getElementById('time-nominal').value);
+    if (!nominal) { shake(document.getElementById('time-nominal')); return; }
+
+    const secondsTotal = (nominal * 86400) / MBG;
+
+    let timeString = '';
+    let exactString = '';
+    
+    if (secondsTotal < 1) {
+      timeString = (secondsTotal * 1000).toFixed(0) + ' milidetik';
+    } else if (secondsTotal < 60) {
+      timeString = secondsTotal.toFixed(1) + ' detik';
+    } else if (secondsTotal < 3600) {
+      const m = Math.floor(secondsTotal / 60);
+      const s = Math.floor(secondsTotal % 60);
+      timeString = `${m} menit ${s} detik`;
+    } else if (secondsTotal < 86400) {
+      const h = Math.floor(secondsTotal / 3600);
+      const m = Math.floor((secondsTotal % 3600) / 60);
+      const s = Math.floor(secondsTotal % 60);
+      timeString = `${h} jam ${m} menit`;
+      exactString = `(Tepatnya: ${h} jam ${m} menit ${s} detik)`;
+    } else {
+      const d = Math.floor(secondsTotal / 86400);
+      const h = Math.floor((secondsTotal % 86400) / 3600);
+      timeString = `${d} hari ${h} jam`;
+      const m = Math.floor((secondsTotal % 3600) / 60);
+      exactString = `(Tepatnya: ${d} hari ${h} jam ${m} menit)`;
+    }
+
+    document.getElementById('timeResultNumber').textContent = timeString;
+    document.getElementById('timeResultExact').textContent = exactString;
+    document.getElementById('timeResultDesc').textContent = desc;
+    document.getElementById('metaTimeNominal').textContent = fRp(nominal);
+
+    const grid = document.getElementById('timeContextGrid');
+    grid.innerHTML = '';
+    [
+      {icon:'⏱', val: fNum(secondsTotal) + ' dtk', desc: 'Total dalam detik'},
+      {icon:'💸', val: 'Rp 13,89 Juta', desc: 'Uang habis per detik'},
+      {icon:'🔥', val: 'Rp 833,33 Juta', desc: 'Uang habis per menit'},
+    ].forEach(c => {
+      const el = document.createElement('div'); el.className = 'ctx-card';
+      el.innerHTML = `<div class="ctx-icon">${c.icon}</div><div class="ctx-val">${c.val}</div><div class="ctx-desc">${c.desc}</div>`;
+      grid.appendChild(el);
+    });
+
+    document.getElementById('timeResultSection').className = 'time-result-section show';
+    document.getElementById('timeResultSection').scrollIntoView({behavior:'smooth',block:'nearest'});
+    saveHist({type:'c', p:desc, h:nominal, s:secondsTotal, ts:timeString});
+  }
+
   /* ANIMATE HELPERS */
   function animNum(id, target, fmt, exactId) {
     const el = document.getElementById(id);
@@ -515,6 +635,9 @@
         const ps = h.pct>=1 ? h.pct.toFixed(2)+'%' : h.pct.toFixed(4)+'%';
         el.innerHTML = `<span class="h-name">${h.p}</span><span class="h-price">${fNum(h.jml)} × ${fRp(h.h)}</span><span class="h-result">${ps} MBG</span>`;
         el.onclick = () => presetPct(h.p, h.jml, h.h);
+      } else if (h.type==='c') {
+        el.innerHTML = `<span class="h-name">${h.p}</span><span class="h-price">${fRp(h.h)}</span><span class="h-result">${h.ts}</span>`;
+        el.onclick = () => presetWaktu(h.p, h.h);
       } else {
         el.innerHTML = `<span class="h-name">${h.p}</span><span class="h-price">${fRp(h.h)}</span><span class="h-result">${fNum(h.j)} unit</span>`;
         el.onclick = () => preset(h.p, h.h);
@@ -524,7 +647,7 @@
   }
 
   /* INPUT FORMAT */
-  ['harga','pct-harga','pct-jumlah'].forEach(id => {
+  ['harga','pct-harga','pct-jumlah','time-nominal'].forEach(id => {
     document.getElementById(id).addEventListener('input', function() {
       const raw = this.value.replace(/\D/g,'');
       if (raw) this.value = parseInt(raw).toLocaleString('id-ID');
@@ -533,7 +656,8 @@
   document.addEventListener('keydown', e => {
     if (e.key==='Enter') {
       if (document.getElementById('tab-a').classList.contains('active')) hitung();
-      else hitungPct();
+      else if (document.getElementById('tab-b').classList.contains('active')) hitungPct();
+      else hitungWaktu();
     }
   });
 
