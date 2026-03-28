@@ -38,8 +38,11 @@
   .field input { background: var(--card); border: 1px solid var(--border); color: var(--text); font-family: 'Inter', sans-serif; font-size: 15px; padding: 13px 15px; border-radius: 6px; outline: none; transition: border-color .2s; width: 100%; }
   .field input:focus { border-color: var(--yellow); }
   .field input::placeholder { color: #3a3a3a; }
-  .calc-btn { background: var(--yellow); color: var(--dark); font-family: 'Plus Jakarta Sans', sans-serif; font-size: 13px; font-weight: 700; letter-spacing: .05em; border: none; padding: 13px 24px; border-radius: 6px; cursor: pointer; height: 49px; transition: opacity .15s, transform .15s; white-space: nowrap; }
+  .calc-btn { background: var(--yellow); color: var(--dark); font-family: 'Plus Jakarta Sans', sans-serif; font-size: 13px; font-weight: 700; letter-spacing: .05em; border: none; padding: 13px 24px; border-radius: 6px; cursor: pointer; height: 49px; transition: opacity .15s, transform .15s; white-space: nowrap; flex: 1; }
   .calc-btn:hover { opacity: .85; transform: translateY(-1px); }
+  .btn-group { display: flex; gap: 8px; }
+  .clear-btn { background: transparent; color: var(--muted); border: 1px solid var(--border); font-size: 14px; padding: 0 16px; border-radius: 6px; cursor: pointer; height: 49px; transition: all .15s; display: flex; align-items: center; justify-content: center; }
+  .clear-btn:hover { color: var(--text); border-color: var(--muted); }
   .presets { margin-top: 14px; display: flex; flex-wrap: wrap; gap: 7px; align-items: center; }
   .presets span { font-size: 10px; color: var(--muted); letter-spacing: .1em; text-transform: uppercase; }
   .preset-btn { background: transparent; border: 1px solid var(--border); color: var(--text); font-family: 'Inter', sans-serif; font-size: 11px; padding: 5px 11px; border-radius: 20px; cursor: pointer; transition: all .15s; }
@@ -53,7 +56,8 @@
   .result-top { padding: 36px 36px 28px; border-bottom: 1px solid var(--border); display: flex; align-items: flex-start; justify-content: space-between; gap: 20px; flex-wrap: wrap; }
   .result-label { font-size: 10px; letter-spacing: .18em; text-transform: uppercase; color: var(--muted); margin-bottom: 12px; }
   .result-number { font-family: 'Plus Jakarta Sans', sans-serif; font-size: clamp(40px, 7vw, 88px); font-weight: 800; line-height: 1; letter-spacing: -.03em; color: var(--yellow); word-break: break-all; }
-  .result-product { font-size: 16px; color: var(--muted); margin-top: 6px; }
+  .result-exact { font-size: 13px; color: var(--muted); margin-top: 8px; font-family: 'Inter', sans-serif; }
+  .result-product { font-size: 18px; color: var(--text); margin-top: 4px; font-weight: 500; }
   .result-meta { text-align: right; min-width: 180px; }
   .meta-row { display: flex; flex-direction: column; gap: 3px; margin-bottom: 14px; }
   .meta-label { font-size: 10px; letter-spacing: .14em; text-transform: uppercase; color: var(--muted); }
@@ -126,7 +130,7 @@
   @media (max-width: 640px) {
     .mbg-badge { padding: 16px; gap: 6px; }
     .calc-form, .calc-form-pct { grid-template-columns: 1fr; }
-    .calc-btn { width: 100%; }
+    .btn-group { width: 100%; }
     .result-top { flex-direction: column; }
     .result-meta { text-align: left; }
     .result-top,.result-visual,.result-context,.pct-top,.pct-visual,.pct-context { padding-left: 18px; padding-right: 18px; }
@@ -165,7 +169,10 @@
     <div class="calc-form">
       <div class="field"><label>Nama Produk</label><input type="text" id="produk" placeholder="cth: Tiket Konser, iPhone 16..." /></div>
       <div class="field"><label>Harga per Unit (Rp)</label><input type="text" id="harga" placeholder="cth: 3.000.000" inputmode="numeric" /></div>
-      <button class="calc-btn" onclick="hitung()">Hitung ↗</button>
+      <div class="btn-group">
+        <button class="clear-btn" onclick="clearA()" title="Reset">✕</button>
+        <button class="calc-btn" onclick="hitung()">Hitung ↗</button>
+      </div>
     </div>
     <div class="presets">
       <span>Coba:</span>
@@ -176,6 +183,9 @@
       <button class="preset-btn" onclick="preset('Avanza', 260000000)">🚗 Avanza</button>
       <button class="preset-btn" onclick="preset('Kopi Kekinian', 25000)">☕ Kopi Kekinian</button>
       <button class="preset-btn" onclick="preset('Boeing 737', 1200000000000)">✈️ Boeing 737</button>
+      <button class="preset-btn" onclick="preset('Nasi Padang', 20000)">🍚 Nasi Padang</button>
+      <button class="preset-btn" onclick="preset('Laptop Gaming', 25000000)">💻 Laptop Gaming</button>
+      <button class="preset-btn" onclick="preset('Bangun Puskesmas', 5000000000)">🏥 Bangun Puskesmas</button>
     </div>
   </div>
 
@@ -186,7 +196,10 @@
       <div class="field"><label>Nama Produk</label><input type="text" id="pct-produk" placeholder="cth: Motor, Laptop..." /></div>
       <div class="field"><label>Jumlah Unit</label><input type="text" id="pct-jumlah" placeholder="cth: 5.000" inputmode="numeric" /></div>
       <div class="field"><label>Harga per Unit (Rp)</label><input type="text" id="pct-harga" placeholder="cth: 25.000.000" inputmode="numeric" /></div>
-      <button class="calc-btn" onclick="hitungPct()">Hitung ↗</button>
+      <div class="btn-group">
+        <button class="clear-btn" onclick="clearB()" title="Reset">✕</button>
+        <button class="calc-btn" onclick="hitungPct()">Hitung ↗</button>
+      </div>
     </div>
     <div class="presets">
       <span>Coba:</span>
@@ -195,6 +208,9 @@
       <button class="preset-btn" onclick="presetPct('Mobil Listrik', 1000, 500000000)">🚗 1.000 Mobil Listrik</button>
       <button class="preset-btn" onclick="presetPct('Paket Sembako', 1000000, 200000)">🛒 1 Juta Sembako</button>
       <button class="preset-btn" onclick="presetPct('Beasiswa S1', 500000, 10000000)">🎓 500rb Beasiswa S1</button>
+      <button class="preset-btn" onclick="presetPct('Nasi Padang', 10000000, 20000)">🍚 10 Juta Nasi Padang</button>
+      <button class="preset-btn" onclick="presetPct('Puskesmas', 100, 5000000000)">🏥 100 Puskesmas @5M</button>
+      <button class="preset-btn" onclick="presetPct('iPhone 16 Pro', 10000, 21000000)">📱 10rb iPhone @21jt</button>
     </div>
   </div>
 </div>
@@ -206,6 +222,7 @@
       <div>
         <p class="result-label">Dengan Rp 1,2 Triliun, bisa beli</p>
         <div class="result-number" id="resultNumber">0</div>
+        <p class="result-exact" id="resultExact"></p>
         <p class="result-product" id="resultProduct">—</p>
       </div>
       <div class="result-meta">
@@ -295,6 +312,21 @@
   function parseN(v) { return parseFloat(v.replace(/\./g,'').replace(',','.')) || 0; }
   function shake(el) { el.style.animation='none'; void el.offsetWidth; el.style.animation='shake .3s ease'; el.focus(); }
 
+  function clearA() {
+    document.getElementById('produk').value = '';
+    document.getElementById('harga').value = '';
+    document.getElementById('resultSection').className = 'result-section';
+    document.getElementById('produk').focus();
+  }
+
+  function clearB() {
+    document.getElementById('pct-produk').value = '';
+    document.getElementById('pct-jumlah').value = '';
+    document.getElementById('pct-harga').value = '';
+    document.getElementById('pctResultSection').className = 'pct-result-section';
+    document.getElementById('pct-produk').focus();
+  }
+
   /* TABS */
   function switchTab(t) {
     document.querySelectorAll('.tab-btn').forEach((b,i) => b.classList.toggle('active', i===(t==='a'?0:1)));
@@ -320,10 +352,16 @@
 
     const jumlah = Math.floor(MBG / harga);
     const sisa = MBG % harga;
-    animNum('resultNumber', jumlah, v => fNum(v));
+    animNum('resultNumber', jumlah, v => fNum(v), 'resultExact');
     document.getElementById('resultProduct').textContent = produk;
     document.getElementById('metaHarga').textContent = fRp(harga);
-    document.getElementById('metaSisa').textContent = fRp(sisa);
+    
+    const kopiCount = Math.floor(sisa / 25000);
+    if (kopiCount > 0) {
+      document.getElementById('metaSisa').innerHTML = `${fRp(sisa)} <span style="display:block; font-size:12px; font-weight:400; color:var(--muted); margin-top:3px;">≈ ${kopiCount.toLocaleString('id-ID')} Kopi Kekinian</span>`;
+    } else {
+      document.getElementById('metaSisa').textContent = fRp(sisa);
+    }
 
     const persen = Math.min((harga / MBG) * 100, 100);
     const bar = document.getElementById('barFill');
@@ -338,8 +376,6 @@
       {icon:'🏦', val:fRp(sisa), desc:'Sisa dana'},
       {icon:'👥', val:fNum(Math.floor(MBG/15000)), desc:'Porsi MBG (@ Rp 15rb)'},
       {icon:'📆', val:fNum(Math.max(1,Math.ceil(harga/MBG)))+' hari MBG', desc:'Setara berapa hari anggaran'},
-      {icon:'🗓', val:fRp(MBG*365), desc:'Anggaran MBG 1 tahun'},
-      {icon:'⏱', val:fRp(Math.floor(MBG/86400))+'/detik', desc:'Kecepatan habis (24 jam)'},
     ].forEach(c => {
       const el = document.createElement('div'); el.className = 'ctx-card';
       el.innerHTML = `<div class="ctx-icon">${c.icon}</div><div class="ctx-val">${c.val}</div><div class="ctx-desc">${c.desc}</div>`;
@@ -429,13 +465,20 @@
   }
 
   /* ANIMATE HELPERS */
-  function animNum(id, target, fmt) {
+  function animNum(id, target, fmt, exactId) {
     const el = document.getElementById(id);
+    const exactEl = exactId ? document.getElementById(exactId) : null;
     const dur = 600, t0 = performance.now();
     const step = now => {
       const p = Math.min((now-t0)/dur,1), ease = 1-Math.pow(1-p,3);
-      el.textContent = fmt(Math.floor(target*ease));
-      if (p<1) requestAnimationFrame(step); else el.textContent = fmt(target);
+      const current = Math.floor(target*ease);
+      el.textContent = fmt(current);
+      if (exactEl) exactEl.textContent = `(Tepatnya: ${current.toLocaleString('id-ID')} unit)`;
+      if (p<1) requestAnimationFrame(step); 
+      else {
+        el.textContent = fmt(target);
+        if (exactEl) exactEl.textContent = `(Tepatnya: ${target.toLocaleString('id-ID')} unit)`;
+      }
     };
     requestAnimationFrame(step);
   }
